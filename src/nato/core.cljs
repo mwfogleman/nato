@@ -1,6 +1,7 @@
 (ns nato.core
   (:require
-   [reagent.core :as r]))
+   [reagent.core :as r]
+   [clojure.string :as str]))
 
 ;; -------------------------
 ;; Nato Phonetic Alphabet Functionality
@@ -43,21 +44,43 @@
                "Y" "Yankee"
                "Z" "Zulu"})
 
+(def alphabet-regex #"[A-Za-z0-9\.\s]")
+
 (defn convert
   "Converts a string into the NATO phonetic alphabet."
   [input]
-  (type input))
+  (let [items (map clojure.string/upper-case input)
+        values (for [i items] (get alphabet i i))]
+    (clojure.string/join " " values)))
 
-(def app-state (r/atom "Have fun."))
-
+(def app-state (r/atom "Have fun!"))
 
 ;; -------------------------
 ;; Views
 
+(defn nato-input []
+  [:div
+   [:p "Put in a phrase here:"]
+   [:p [:center [:input {:placeholder @app-state
+                         :type "text"
+                         :on-change #(reset! app-state (-> % .-target .-value))}]]]])
+
+(defn nato-output
+  []
+  (let [state @app-state
+        v (convert state)]
+    [:div
+     [:p "Here is what that results in in the NATO Phonetic Alphabet:"] 
+     [:p v]]))
+
 (defn home-page []
   [:div
    [:h2 "The NATO Phonetic Alphabet"]
-   [:h3 "by " [:a {:href "http://www.mwfogleman.com"} "Michael Fogleman"]]])
+   [:h3 "by " [:a {:href "http://www.mwfogleman.com"} "Michael Fogleman"]]
+   [nato-input]
+   [nato-output]])
+
+
 
 ;; -------------------------
 ;; Initialize app
